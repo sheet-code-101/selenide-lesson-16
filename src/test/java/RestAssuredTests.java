@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public class RestAssuredTests {
 
@@ -11,7 +12,8 @@ public class RestAssuredTests {
     private final static int validUserID = 3;
 
     @Test
-    void checkThatUserCanNotBeFoundByNotValidID(){
+    void checkThatUserCanNotBeFoundByNotValidID() {
+
         given()
                 .when()
                 .get(apiURL + "users/" + invalidUserID)
@@ -21,7 +23,7 @@ public class RestAssuredTests {
     }
 
     @Test
-    void checkThatUserCanBeFoundByValidID(){
+    void checkThatUserCanBeFoundByValidID() {
 
         String name = "Emma";
         ExtractableResponse response = given()
@@ -33,5 +35,36 @@ public class RestAssuredTests {
         assertThat(response.path("data.first_name").toString()).isEqualTo(name);
     }
 
+    @Test
+    void checkThatResourcesAmountIsCorrect() {
 
+        given()
+                .when()
+                .get(apiURL + "unknown/")
+                .then()
+                .body("total", is(12));
+    }
+
+    @Test
+    void checkThatParticularResourceColorIsCorrect() {
+
+        int resourceID = 3;
+        String resourceName = "true red";
+        given()
+                .when()
+                .get(apiURL + "unknown/" + resourceID)
+                .then()
+                .body("data.name", is(resourceName));
+    }
+
+    @Test
+    void checkThatParticularResourceDoesntExist() {
+
+        int resourceID = 13;
+        given()
+                .when()
+                .get(apiURL + "unknown/" + resourceID)
+                .then()
+                .statusCode(404);
+    }
 }
